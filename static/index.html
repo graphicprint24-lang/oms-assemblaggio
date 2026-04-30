@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMS Industries — Assemblaggio EMAX2</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #113b65;
+  --navy-light: #1a5494;
+  --navy-pale: #e8f0f8;
+  --navy-mid: #c2d5e8;
+  --graphite: #3c3c3c;
+  --graphite-light: #5a5a5a;
+  --bg: #f5f7fa;
+  --white: #ffffff;
+  --success: #1a7a3c;
+  --success-bg: #e6f4ec;
+  --danger: #b01c1c;
+  --danger-bg: #fbeaea;
+  --border: #d0d8e0;
+  --warn: #7a5800;
+  --warn-bg: #fff8e6;
+}
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--graphite); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* HEADER */
+.header { background: var(--navy); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.header-logo { background: #fff; border-radius: 4px; padding: 4px 10px; font-size: 13px; font-weight: 700; color: var(--navy); letter-spacing: .04em; }
+.header-title { color: #fff; font-size: 15px; font-weight: 500; }
+.header-sub { color: var(--navy-mid); font-size: 11px; }
+.header-status { display: flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #4cdb7a; }
+.dot.red { background: #e05c5c; }
+
+/* SCHERMATE */
+.screen { display: none; flex: 1; overflow: hidden; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* LOGIN */
+.login-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+.login-card { background: var(--white); border-radius: 12px; border: 0.5px solid var(--border); padding: 40px 32px; width: 380px; }
+.login-logo { text-align: center; margin-bottom: 24px; }
+.login-logo-badge { background: var(--navy); display: inline-block; border-radius: 6px; padding: 6px 20px; margin-bottom: 10px; }
+.login-logo-badge span { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: .06em; }
+.login-title { font-size: 18px; font-weight: 500; color: var(--graphite); margin-bottom: 4px; }
+.login-sub { font-size: 12px; color: #888; }
+.form-group { margin-bottom: 16px; }
+.form-group label { font-size: 12px; color: var(--graphite-light); font-weight: 500; display: block; margin-bottom: 6px; }
+select, input[type=password], input[type=text] { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 6px; font-size: 15px; color: var(--graphite); background: var(--white); outline: none; }
+select:focus, input:focus { border-color: var(--navy); }
+.pin-input { text-align: center; font-size: 24px; letter-spacing: .4em; }
+.btn { width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; border: none; transition: opacity .15s; }
+.btn:hover { opacity: .88; }
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-secondary { background: #eee; color: var(--graphite); }
+.login-hint { text-align: center; margin-top: 12px; font-size: 11px; color: #aaa; }
+
+/* OPERATIVO */
+.op-bar { background: var(--white); border-bottom: 0.5px solid var(--border); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.op-bar-user { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.op-name { font-size: 13px; font-weight: 500; }
+.op-turn { font-size: 11px; color: #888; }
+.progress-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.progress-bar { height: 5px; width: 120px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--navy); border-radius: 3px; transition: width .4s; }
+.progress-label { font-size: 13px; font-weight: 500; color: var(--navy); }
+
+.op-body { display: flex; flex: 1; overflow: hidden; }
+
+/* SIDEBAR STEP */
+.sidebar { width: 240px; background: var(--bg); border-right: 0.5px solid var(--border); overflow-y: auto; flex-shrink: 0; padding: 12px; }
+.sidebar-title { font-size: 10px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; padding: 0 4px; }
+.step-item { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 6px; border: 0.5px solid transparent; margin-bottom: 4px; background: var(--white); cursor: default; transition: all .15s; }
+.step-item.done { opacity: .45; }
+.step-item.active { border-color: var(--navy); background: var(--navy-pale); }
+.step-item.nok { border-color: var(--danger); background: var(--danger-bg); }
+.step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; background: #e8e8e8; color: var(--graphite); }
+.step-num.done { background: var(--success-bg); color: var(--success); font-size: 13px; }
+.step-num.active { background: var(--navy); color: #fff; }
+.step-num.nok { background: var(--danger-bg); color: var(--danger); }
+.step-label { font-size: 12px; color: var(--graphite-light); line-height: 1.3; }
+.step-item.active .step-label { font-weight: 500; color: var(--navy); }
+
+/* AREA STEP ATTIVO */
+.step-main { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+.step-card { background: var(--white); border-radius: 10px; border: 2px solid var(--navy); padding: 24px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+.step-badge { display: inline-block; background: var(--navy-pale); color: var(--navy); font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: .03em; }
+.step-title { font-size: 24px; font-weight: 500; color: var(--graphite); }
+.step-codice { font-size: 15px; color: #888; }
+.step-codice span { font-weight: 600; color: var(--navy); font-size: 16px; }
+.step-istruzione { background: var(--navy-pale); border-left: 3px solid var(--navy); border-radius: 6px; padding: 14px 16px; font-size: 14px; color: var(--graphite); line-height: 1.6; }
+.step-istruzione.warn { background: var(--warn-bg); border-left-color: var(--warn); color: var(--warn); }
+
+/* METRICHE */
+.metrics { display: flex; gap: 10px; }
+.metric { flex: 1; background: var(--navy-pale); border-radius: 8px; padding: 12px; text-align: center; }
+.metric-label { font-size: 10px; color: var(--navy); font-weight: 500; margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--navy); }
+.metric.ok .metric-value { color: var(--success); }
+.metric.ok { background: var(--success-bg); }
+.metric.err .metric-value { color: var(--danger); }
+.metric.err { background: var(--danger-bg); }
+
+/* AVVITATORE */
+.avv-lista { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+.avv-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+.avv-row.ok { background: var(--success-bg); }
+.avv-row.nok { background: var(--danger-bg); }
+.avv-badge { padding: 1px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.avv-badge.ok { background: var(--success); color: #fff; }
+.avv-badge.nok { background: var(--danger); color: #fff; }
+
+/* BARCODE INPUT */
+.barcode-input { display: flex; gap: 8px; }
+.barcode-input input { flex: 1; padding: 12px; border: 0.5px solid var(--border); border-radius: 6px; font-size: 15px; font-family: monospace; letter-spacing: .06em; }
+.barcode-input button { padding: 12px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; background: var(--navy); color: #fff; cursor: pointer; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #fff; z-index: 999; display: none; animation: fadeup .3s; }
+.toast.ok { background: var(--success); }
+.toast.err { background: var(--danger); }
+@keyframes fadeup { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+/* DASHBOARD */
+.dash-body { flex: 1; overflow-y: auto; padding: 20px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-card { background: var(--white); border-radius: 8px; border: 0.5px solid var(--border); padding: 16px; border-top: 3px solid var(--navy); }
+.kpi-card.ok { border-top-color: var(--success); }
+.kpi-card.err { border-top-color: var(--danger); }
+.kpi-card.gray { border-top-color: var(--graphite); }
+.kpi-label { font-size: 10px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 500; color: var(--navy); }
+.kpi-card.ok .kpi-value { color: var(--success); }
+.kpi-card.err .kpi-value { color: var(--danger); }
+.kpi-card.gray .kpi-value { color: var(--graphite); }
+.log-table { background: var(--white); border-radius: 10px; border: 0.5px solid var(--border); overflow: hidden; }
+.log-header { display: flex; gap: 10px; padding: 10px 16px; background: #f5f7fa; font-size: 11px; color: #aaa; font-weight: 500; border-bottom: 0.5px solid var(--border); }
+.log-row-item { display: flex; gap: 10px; padding: 9px 16px; font-size: 12px; border-bottom: 0.5px solid #eee; align-items: center; }
+.log-row-item.nok { background: var(--danger-bg); }
+.col-time { width: 72px; flex-shrink: 0; color: #999; }
+.col-op { width: 130px; flex-shrink: 0; }
+.col-step { flex: 1; }
+.col-coppia { width: 72px; flex-shrink: 0; text-align: right; }
+.col-esito { width: 52px; flex-shrink: 0; text-align: center; }
+.badge { padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.badge.ok { background: var(--success-bg); color: var(--success); }
+.badge.nok { background: var(--danger-bg); color: var(--danger); }
+
+/* NAV TABS DASH */
+.nav-tabs { display: flex; gap: 6px; padding: 12px 20px 0; background: var(--white); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.nav-tab { padding: 8px 18px; border-radius: 6px 6px 0 0; font-size: 13px; cursor: pointer; border: 0.5px solid transparent; color: #888; background: transparent; }
+.nav-tab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* FINE CICLO */
+.fine-card { background: var(--white); border-radius: 12px; border: 2px solid var(--success); padding: 32px; text-align: center; margin: auto; max-width: 440px; }
+.fine-icon { font-size: 48px; margin-bottom: 12px; }
+.fine-title { font-size: 22px; font-weight: 500; color: var(--success); margin-bottom: 8px; }
+.fine-sub { font-size: 14px; color: #888; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="header-logo">OMS</div>
+    <div>
+      <div class="header-title">OMS Industries</div>
+      <div class="header-sub">Sistema Assemblaggio EMAX2</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="dot" id="conn-dot"></div>
+    <span style="color:var(--navy-mid);font-size:12px" id="conn-label">Connessione...</span>
+  </div>
+</div>
+
+<!-- SCHERMATA LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-badge"><span>OMS</span></div>
+        <div class="login-title">Accesso postazione</div>
+        <div class="login-sub">Ciclo EMAX2 — Assemblaggio Scatola</div>
+      </div>
+      <div class="form-group">
+        <label>Operatore</label>
+        <select id="sel-operatore"><option value="">— Seleziona —</option></select>
+      </div>
+      <div class="form-group">
+        <label>PIN di accesso</label>
+        <input type="password" class="pin-input" id="inp-pin" placeholder="••••" maxlength="8">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Inizia turno</button>
+      <div class="login-hint">PIN demo operatori: 1234 &nbsp;|&nbsp; Supervisore: 0000</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHERMATA OPERATIVA -->
+<div class="screen" id="screen-op">
+  <div class="op-bar">
+    <div class="op-bar-user">
+      <div class="avatar" id="av-initials">MR</div>
+      <div>
+        <div class="op-name" id="op-name">—</div>
+        <div class="op-turn" id="op-turn">Turno in corso</div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:11px;color:#888">Ciclo attivo</div>
+      <div style="font-size:13px;font-weight:500;color:var(--navy)">EMAX2 — Assemblaggio Scatola</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <span class="progress-label" id="progress-label">0/13</span>
+    </div>
+  </div>
+
+  <div class="op-body">
+    <div class="sidebar">
+      <div class="sidebar-title">Sequenza step</div>
+      <div id="step-list"></div>
+    </div>
+    <div class="step-main">
+      <div class="step-card" id="step-card">
+        <div style="text-align:center;color:#aaa;margin:auto">Caricamento ciclo...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHERMATA FINE CICLO -->
+<div class="screen" id="screen-fine">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div class="fine-card">
+      <div class="fine-icon">✓</div>
+      <div class="fine-title">Ciclo completato</div>
+      <div class="fine-sub" id="fine-sub">Tutti gli step sono stati eseguiti correttamente.</div>
+      <button class="btn btn-primary" onclick="nuovoCiclo()">Nuovo ciclo</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCHERMATA SUPERVISORE -->
+<div class="screen" id="screen-dash">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="dashTab('kpi')">KPI giornalieri</button>
+    <button class="nav-tab" onclick="dashTab('log')">Log avvitature</button>
+    <button class="nav-tab" onclick="showScreen('login')" style="margin-left:auto;color:#888">Esci</button>
+  </div>
+  <div class="dash-body">
+    <div id="dash-kpi">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Cicli completati</div><div class="kpi-value" id="kpi-cicli">—</div></div>
+        <div class="kpi-card ok"><div class="kpi-label">Avvitature OK</div><div class="kpi-value" id="kpi-ok">—</div></div>
+        <div class="kpi-card err"><div class="kpi-label">Avvitature NOK</div><div class="kpi-value" id="kpi-nok">—</div></div>
+        <div class="kpi-card gray"><div class="kpi-label">Operatori attivi</div><div class="kpi-value" id="kpi-op">—</div></div>
+      </div>
+      <button class="btn btn-secondary" onclick="loadDashboard()" style="width:auto;padding:10px 20px;font-size:13px">Aggiorna</button>
+    </div>
+    <div id="dash-log" style="display:none">
+      <div class="log-table">
+        <div class="log-header">
+          <span class="col-time">Ora</span>
+          <span class="col-op">Operatore</span>
+          <span class="col-step">Step</span>
+          <span class="col-coppia">Coppia</span>
+          <span class="col-esito">Esito</span>
+        </div>
+        <div id="log-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+let stato = {
+  operatore: null,
+  sessione_id: null,
+  ciclo_id: 1,
+  steps: [],
+  step_idx: 0,
+  step_completati: [],
+  polling: null,
+};
+
+// ============================================================
+// UTILITY
+// ============================================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function toast(msg, tipo = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + tipo;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Errore di rete' }));
+    throw new Error(err.detail || 'Errore');
+  }
+  return res.json();
+}
+
+// ============================================================
+// HEALTH CHECK
+// ============================================================
+async function checkHealth() {
+  try {
+    await api('/api/health');
+    document.getElementById('conn-dot').className = 'dot';
+    document.getElementById('conn-label').textContent = 'Postazione ASS-01';
+  } catch {
+    document.getElementById('conn-dot').className = 'dot red';
+    document.getElementById('conn-label').textContent = 'Backend non raggiungibile';
+  }
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+async function loadOperatori() {
+  try {
+    const ops = await api('/api/operatori');
+    const sel = document.getElementById('sel-operatore');
+    ops.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.id;
+      opt.textContent = `${o.cognome} ${o.nome} (${o.ruolo})`;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    toast('Errore caricamento operatori: ' + e.message, 'err');
+  }
+}
+
+async function doLogin() {
+  const op_id = parseInt(document.getElementById('sel-operatore').value);
+  const pin = document.getElementById('inp-pin').value;
+  if (!op_id || !pin) { toast('Seleziona operatore e inserisci PIN', 'err'); return; }
+  try {
+    const res = await api('/api/login', 'POST', { operatore_id: op_id, pin });
+    stato.operatore = res;
+
+    if (res.ruolo === 'supervisore' || res.ruolo === 'admin') {
+      loadDashboard();
+      showScreen('dash');
+      return;
+    }
+
+    document.getElementById('op-name').textContent = res.nome + ' ' + res.cognome;
+    document.getElementById('av-initials').textContent =
+      res.nome[0].toUpperCase() + res.cognome[0].toUpperCase();
+    document.getElementById('op-turn').textContent =
+      'Turno dalle ' + new Date().toTimeString().slice(0,5);
+
+    await avviaCiclo();
+    showScreen('op');
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+// ============================================================
+// CICLO
+// ============================================================
+async function avviaCiclo() {
+  try {
+    stato.steps = await api(`/api/ciclo/${stato.ciclo_id}/step`);
+    const sess = await api('/api/sessione/avvia', 'POST', {
+      operatore_id: stato.operatore.operatore_id,
+      ciclo_id: stato.ciclo_id
+    });
+    stato.sessione_id = sess.sessione_id;
+    stato.step_idx = 0;
+    stato.step_completati = [];
+    renderSidebar();
+    renderStepAttivo();
+  } catch (e) {
+    toast('Errore avvio ciclo: ' + e.message, 'err');
+  }
+}
+
+function renderSidebar() {
+  const list = document.getElementById('step-list');
+  list.innerHTML = '';
+  stato.steps.forEach((s, i) => {
+    const completato = stato.step_completati.find(c => c.step_id === s.id);
+    const isActive = i === stato.step_idx;
+    const isNok = completato && completato.esito === 'nok';
+    const isDone = completato && !isActive;
+
+    const div = document.createElement('div');
+    div.className = 'step-item' +
+      (isActive ? ' active' : '') +
+      (isDone && !isNok ? ' done' : '') +
+      (isNok ? ' nok' : '');
+
+    const numClass = isActive ? 'active' : isDone ? (isNok ? 'nok' : 'done') : '';
+    const numText = isDone ? (isNok ? '✗' : '✓') : s.ordine;
+
+    div.innerHTML = `
+      <div class="step-num ${numClass}">${numText}</div>
+      <div class="step-label">${s.titolo}</div>`;
+    list.appendChild(div);
+  });
+  list.children[stato.step_idx]?.scrollIntoView({ block: 'nearest' });
+}
+
+function renderStepAttivo() {
+  const totale = stato.steps.length;
+  const completati = stato.step_completati.length;
+  document.getElementById('progress-fill').style.width = (completati / totale * 100) + '%';
+  document.getElementById('progress-label').textContent = `${completati}/${totale}`;
+
+  if (stato.step_idx >= totale) {
+    fineCiclo();
+    return;
+  }
+
+  const step = stato.steps[stato.step_idx];
+  const tipo = step.tipo_avanzamento;
+  const card = document.getElementById('step-card');
+
+  let htmlTipo = '';
+  let htmlBottom = '';
+
+  if (tipo === 'barcode' || tipo === 'visivo') {
+    htmlTipo = `<div class="step-badge">Step ${step.ordine} — Conferma operatore</div>`;
+    htmlBottom = `<button class="btn btn-success" onclick="confermaVisivo()">Confermato — procedi</button>`;
+  }
+
+  card.innerHTML = `
+    ${htmlTipo}
+    <div class="step-title">${step.titolo}</div>
+    ${step.codice_atteso ? `<div class="step-codice">Codice: <span>${step.codice_atteso}</span></div>` : ''}
+    <div class="step-istruzione">${step.istruzione}</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Step completati</div><div class="metric-value">${completati}</div></div>
+      <div class="metric ok"><div class="metric-label">Errori ciclo</div>
+        <div class="metric-value">${stato.step_completati.filter(s=>s.esito==='nok').length}</div></div>
+      <div class="metric"><div class="metric-label">Tempo turno</div><div class="metric-value" id="timer">00:00</div></div>
+    </div>
+    ${htmlBottom}`;
+
+  if (tipo === 'avvitatore') {
+    avviaPollingAvvitatore(step);
+  }
+}
+
+// ============================================================
+// AVANZAMENTO STEP
+// ============================================================
+async function avanзaStep(valore_letto = null, esito = 'ok') {
+  const step = stato.steps[stato.step_idx];
+  try {
+    await api(`/api/sessione/${stato.sessione_id}/step`, 'POST', {
+      step_id: step.id,
+      esito,
+      valore_letto,
+    });
+    stato.step_completati.push({ step_id: step.id, esito });
+    stato.step_idx++;
+    if (stato.polling) { clearInterval(stato.polling); stato.polling = null; }
+    renderSidebar();
+    renderStepAttivo();
+    toast('Step completato', 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+function confermaBarcodeBtn() {
+  const val = document.getElementById('barcode-inp')?.value?.trim();
+  if (!val) { toast('Inserisci il codice barcode', 'err'); return; }
+  avanзaStep(val);
+}
+
+function confermaVisivo() {
+  avanзaStep(null, 'ok');
+}
+
+// ============================================================
+// POLLING AVVITATORE
+// ============================================================
+function avviaPollingAvvitatore(step) {
+  if (stato.polling) clearInterval(stato.polling);
+  stato.polling = setInterval(async () => {
+    try {
+      const res = await api(
+        `/api/sessione/${stato.sessione_id}/avvitatura/stato?step_id=${step.id}`
+      );
+      const lista = document.getElementById('avv-lista');
+      const statoEl = document.getElementById('avv-stato');
+      const btn = document.getElementById('btn-avv');
+      if (!lista) return;
+
+      lista.innerHTML = res.avvitature.map(a => `
+        <div class="avv-row ${a.esito.toLowerCase()}">
+          <span class="avv-badge ${a.esito.toLowerCase()}">${a.esito}</span>
+          <span>${a.coppia_nm.toFixed(2)} Nm</span>
+          <span style="color:#aaa;font-size:11px">${a.timestamp.slice(11,19)}</span>
+        </div>`).join('');
+
+      if (res.validato) {
+        statoEl.textContent = `✓ ${res.n_ok}/${res.n_richieste} avvitature OK — puoi procedere`;
+        statoEl.style.color = 'var(--success)';
+        btn.disabled = false;
+        btn.textContent = 'Procedi al prossimo step';
+        btn.className = 'btn btn-success';
+      } else {
+        statoEl.textContent = `${res.n_ok}/${res.n_richieste} avvitature OK...`;
+        statoEl.style.color = '#888';
+      }
+    } catch {}
+  }, 1500);
+}
+
+function confermaAvvitatore() {
+  if (stato.polling) { clearInterval(stato.polling); stato.polling = null; }
+  avanзaStep(null, 'ok');
+}
+
+// Simulazione manuale avvitatura — contatore semplice
+let _avvOk = 0;
+let _avvMax = 0;
+
+function simulaAvvitatura() {
+  const step = stato.steps[stato.step_idx];
+  if (!step) return;
+  if (_avvMax === 0) _avvMax = step.n_avvitature || 6;
+
+  _avvOk++;
+  const coppia = ((step.coppia_min_nm + step.coppia_max_nm) / 2 + (Math.random() * 0.2 - 0.1)).toFixed(2);
+
+  const lista = document.getElementById('avv-lista');
+  const statoEl = document.getElementById('avv-stato');
+  const btn = document.getElementById('btn-avv');
+  const btnSim = document.getElementById('btn-simula');
+
+  if (lista) {
+    const row = document.createElement('div');
+    row.className = 'avv-row ok';
+    row.innerHTML = `<span class="avv-badge ok">OK</span><span>${coppia} Nm</span><span style="color:#aaa;font-size:11px">${new Date().toTimeString().slice(0,8)}</span>`;
+    lista.appendChild(row);
+    lista.scrollTop = lista.scrollHeight;
+  }
+
+  if (statoEl) {
+    statoEl.textContent = `${_avvOk}/${_avvMax} avvitature OK...`;
+    statoEl.style.color = '#888';
+  }
+
+  if (_avvOk >= _avvMax) {
+    if (statoEl) {
+      statoEl.textContent = `✓ ${_avvOk}/${_avvMax} avvitature OK — puoi procedere`;
+      statoEl.style.color = 'var(--success)';
+    }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Procedi al prossimo step';
+      btn.className = 'btn btn-success';
+    }
+    if (btnSim) btnSim.disabled = true;
+    _avvOk = 0;
+    _avvMax = 0;
+  }
+}
+
+// ============================================================
+// FINE CICLO
+// ============================================================
+async function fineCiclo() {
+  try {
+    const res = await api(`/api/sessione/${stato.sessione_id}/chiudi`, 'POST');
+    const nok = stato.step_completati.filter(s => s.esito === 'nok').length;
+    document.getElementById('fine-sub').textContent =
+      nok === 0
+        ? 'Tutti gli step sono stati eseguiti correttamente.'
+        : `Ciclo completato con ${nok} step in errore.`;
+    showScreen('fine');
+  } catch (e) {
+    toast('Errore chiusura sessione: ' + e.message, 'err');
+  }
+}
+
+function nuovoCiclo() {
+  stato.sessione_id = null;
+  stato.step_idx = 0;
+  stato.step_completati = [];
+  document.getElementById('inp-pin').value = '';
+  showScreen('login');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function loadDashboard() {
+  try {
+    const d = await api('/api/dashboard');
+    document.getElementById('kpi-cicli').textContent = d.cicli_completati;
+    document.getElementById('kpi-ok').textContent = d.avvitature_ok;
+    document.getElementById('kpi-nok').textContent = d.avvitature_nok;
+    document.getElementById('kpi-op').textContent = d.operatori_attivi;
+  } catch (e) {
+    toast('Errore dashboard: ' + e.message, 'err');
+  }
+  try {
+    const logs = await api('/api/log/avvitature');
+    const body = document.getElementById('log-body');
+    if (logs.length === 0) {
+      body.innerHTML = '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">Nessuna avvitatura registrata oggi.</div>';
+      return;
+    }
+    body.innerHTML = logs.map(l => `
+      <div class="log-row-item ${l.esito === 'NOK' ? 'nok' : ''}">
+        <span class="col-time">${l.timestamp.slice(11,19)}</span>
+        <span class="col-op">${l.nome} ${l.cognome}</span>
+        <span class="col-step">Step ${l.step_ordine} — ${l.step_titolo}</span>
+        <span class="col-coppia">${l.coppia_nm.toFixed(2)} Nm</span>
+        <span class="col-esito"><span class="badge ${l.esito.toLowerCase()}">${l.esito}</span></span>
+      </div>`).join('');
+  } catch {}
+}
+
+function dashTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('dash-kpi').style.display = tab === 'kpi' ? 'block' : 'none';
+  document.getElementById('dash-log').style.display = tab === 'log' ? 'block' : 'none';
+}
+
+// ============================================================
+// TIMER TURNO
+// ============================================================
+let turnoStart = Date.now();
+setInterval(() => {
+  const el = document.getElementById('timer');
+  if (!el) return;
+  const sec = Math.floor((Date.now() - turnoStart) / 1000);
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  el.textContent = `${m}:${s}`;
+}, 1000);
+
+// ============================================================
+// INIT
+// ============================================================
+checkHealth();
+setInterval(checkHealth, 10000);
+loadOperatori();
+</script>
+</body>
+</html>
